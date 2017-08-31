@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+<style>
+	#canvas {
+		border: 1px solid black;
+	}
+</style>
+</head>
+<body>
+	<canvas id="canvas" width="400" height="300"></canvas>
+<script>
+const log = console.log.bind(console)
+
+const _main = () => {
+	const canvas = document.getElementById('canvas')
+	const context = canvas.getContext('2d')
+	const img = new Image()
+	let x = 130
+	let y = 200
+	let speed = 15
+	let isLeft = false
+	let isRight = false
+
+	const draw = (x,y) => {
+		context.drawImage(img,x,y)
+	}
+	const clear = () => {
+		context.clearRect(0,0,canvas.width,canvas.height)
+	}
+	img.src = 'img.jpg'
+	img.onload = () => {
+		draw(x,y)
+	}
+
+	document.addEventListener('keydown',({key}) => {
+		if (key == 'a') {
+			isLeft = true
+		}
+		if (key == 'd') {
+			isRight = true
+		}
+	})
+	document.addEventListener('keyup',({key}) => {
+		if (key == 'a') {
+			isLeft = false
+		}
+		if (key == 'd') {
+			isRight = false
+		}
+	})
+	setInterval(() => {
+		if (isLeft) {
+			x -= speed
+		}
+		if (isRight) {
+			x += speed
+		}
+		if (x < 0 ) {
+			x = 0
+		}
+		if (x > 282) {
+			x = 282
+		}
+		clear()
+		draw(x,y)
+	},1000/60)
+}
+
+_main()
+</script>
+</body>
+</html>
