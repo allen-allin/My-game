@@ -14,59 +14,123 @@
 <script>
 const log = console.log.bind(console)
 
-const _main = () => {
+const getImg = (src) => {
+	let img = new Image()
+	img.src = src
+	return img
+}
+
+const Paddle = () => {
+	let o = {
+		img: getImg('paddle.jpg'),
+		x: 130,
+		y: 200,
+		speed: 20,
+		moveLeft() {
+			this.x -= this.speed
+			if (this.x < 0) {
+				this.x = 0
+			}
+		},
+		moveRight() {
+			this.x += this.speed
+			if (this.x > 282) {
+				this.x = 282
+			}
+
+		},
+
+	}
+	return o
+}
+const Ball = () => {
+	let o = {
+		img: getImg('ball.jpg'),
+		x: 180,
+		y: 170,
+		speedX: 5,
+		speedY: 5,
+		isFire: false,
+		move() {
+			if (!this.isFire) {return}
+			if (this.x < 0 || this.x > 400 - this.img.width) {
+				this.speedX *= -1
+			}
+			if (this.y < 0 || this.y > 200 - this.img.height) {
+				this.speedY *= -1
+			}
+			this.x += this.speedX
+			this.y += this.speedY
+		},
+		fire() {
+			this.isFire = true
+		}
+	}
+	return o
+}
+
+const Game = () => {
+
 	const canvas = document.getElementById('canvas')
 	const context = canvas.getContext('2d')
-	const img = new Image()
-	let x = 130
-	let y = 200
-	let speed = 15
-	let isLeft = false
-	let isRight = false
-
-	const draw = (x,y) => {
-		context.drawImage(img,x,y)
-	}
-	const clear = () => {
-		context.clearRect(0,0,canvas.width,canvas.height)
-	}
-	img.src = 'img.jpg'
-	img.onload = () => {
-		draw(x,y)
+	let g = {
+		canvas,
+		context,
+		clear() {
+			this.context.clearRect(0,0,this.canvas.width,this.canvas.height)
+		},
+		actions: {},
+		keyDowns: {},
+		registerActions(key,callback) {	
+			this.actions[key] = callback
+		},
+		drawImage(imgObj) {
+			this.context.drawImage(imgObj.img,imgObj.x,imgObj.y)
+		}
 	}
 
 	document.addEventListener('keydown',({key}) => {
-		if (key == 'a') {
-			isLeft = true
-		}
-		if (key == 'd') {
-			isRight = true
-		}
+		g.keyDowns[key] = true
 	})
 	document.addEventListener('keyup',({key}) => {
-		if (key == 'a') {
-			isLeft = false
-		}
-		if (key == 'd') {
-			isRight = false
-		}
+		g.keyDowns[key] = false
 	})
 	setInterval(() => {
-		if (isLeft) {
-			x -= speed
+		for(let key in g.actions) {
+			if (g.keyDowns[key]) {
+				g.actions[key]()
+			}
 		}
-		if (isRight) {
-			x += speed
-		}
-		if (x < 0 ) {
-			x = 0
-		}
-		if (x > 282) {
-			x = 282
-		}
-		clear()
-		draw(x,y)
+		g.update()
+		g.clear()
+		g.draw()
 	},1000/60)
+
+	return g
+}
+
+const _main = () => {
+
+	let game = Game()
+	let paddle = Paddle()
+	let ball = Ball()
+
+	game.registerActions('a',() => {
+		paddle.moveLeft()
+	})
+	game.registerActions('d',() => {
+		paddle.moveRight()
+	})
+	game.registerActions('f',() => {
+		ball.fire()
+	})
+	game.update = () => {
+		ball.move()
+	}
+	game.draw = () => {
+		game.drawImage(paddle)
+		game.drawImage(ball)
+	}
 }
 
 _main()
