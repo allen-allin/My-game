@@ -39,7 +39,12 @@ const Paddle = () => {
 			}
 
 		},
-
+		collision(ball) {
+			if (ball.y > this.y - this.img.height &&  ball.x < this.x + this.img.width && ball.x > this.x) {
+				return true
+			}
+			return false
+		}
 	}
 	return o
 }
@@ -51,12 +56,13 @@ const Ball = () => {
 		speedX: 5,
 		speedY: 5,
 		isFire: false,
-		move() {
+		move(isColl) {
+			console.log(isColl)
 			if (!this.isFire) {return}
 			if (this.x < 0 || this.x > 400 - this.img.width) {
 				this.speedX *= -1
 			}
-			if (this.y < 0 || this.y > 200 - this.img.height) {
+			if (this.y < 0 || isColl) {
 				this.speedY *= -1
 			}
 			this.x += this.speedX
@@ -125,8 +131,9 @@ const _main = () => {
 		ball.fire()
 	})
 	game.update = () => {
-		ball.move()
+		ball.move(paddle.collision(ball))
 	}
+
 	game.draw = () => {
 		game.drawImage(paddle)
 		game.drawImage(ball)
